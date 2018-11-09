@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <vector>
+#pragma once
 
-TEST(bit_ostream, test) {
-}
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+/*
+ * Computes the number of bits required to store the given integer value.
+ */
+inline constexpr uint8_t bits(size_t value) {
+    return value == 0 ? 1U : (64 - __builtin_clzll(value));
 }
