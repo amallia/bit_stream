@@ -18,7 +18,8 @@
 
 class bit_istream {
    public:
-    bit_istream(uint8_t const *in) : m_in(in), m_avail(0), m_buf(0), m_pos(0) {}
+    bit_istream(uint8_t const *in)
+        : m_in(reinterpret_cast<const uint32_t *>(in)), m_avail(0), m_buf(0), m_pos(0) {}
 
     size_t position() const { return m_pos; }
 
@@ -28,7 +29,7 @@ class bit_istream {
 
         if (m_avail < len) {
             m_buf |= uint64_t(*m_in++) << m_avail;
-            m_avail += 8;
+            m_avail += 32;
         }
         uint32_t val = m_buf & ((uint64_t(1) << len) - 1);
         m_buf >>= len;
@@ -38,9 +39,7 @@ class bit_istream {
         return val;
     }
 
-    inline uint8_t read_bit() {
-      return read(1);
-    }
+    inline uint8_t read_bit() { return read(1); }
 
     inline uint32_t read_unary() {
         uint32_t v = 0;
@@ -61,18 +60,18 @@ class bit_istream {
 
     inline uint32_t read_vbyte() {
         uint32_t val = 0;
-        size_t i = 0;
-        while(read_bit()){
-          val |= read(7) << (7 * i++);;
+        size_t   i   = 0;
+        while (read_bit()) {
+            val |= read(7) << (7 * i++);
+            ;
         }
         val |= read(7) << (7 * i);
         return val;
-
     }
 
    private:
-    uint8_t const *m_in;
-    uint32_t       m_avail;
-    uint64_t       m_buf;
-    size_t         m_pos;
+    uint32_t const *m_in;
+    uint32_t        m_avail;
+    uint64_t        m_buf;
+    size_t          m_pos;
 };

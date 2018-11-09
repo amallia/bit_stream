@@ -41,7 +41,7 @@ TEST(bit_stream, bytes) {
     EXPECT_EQ(bytes(65536), 3);
 }
 
-TEST(bit_stream, test) {
+TEST(bit_stream, single_value) {
     {
         auto value = 100;
         std::vector<uint8_t> buffer(bytes(value));
@@ -95,6 +95,24 @@ TEST(bit_stream, test) {
         bo.write_vbyte(value);
         auto decoded_value = bi.read_vbyte();
         EXPECT_EQ(decoded_value, value);
+    }
+}
+
+TEST(bit_stream, multi_value) {
+    auto count = 1000;
+    std::vector<uint8_t> buffer(count * 32);
+    bit_ostream          bo(buffer.data());
+    bit_istream          bi(buffer.data());
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        bo.write(i, 32);
+    }
+    auto ptr = reinterpret_cast<uint32_t *>(buffer.data());
+    for (size_t i = 0; i < count; ++i)
+    {
+        EXPECT_EQ(i, bi.read(32));
+        EXPECT_EQ(i, ptr[i]);
     }
 }
 
